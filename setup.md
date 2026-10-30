@@ -53,8 +53,8 @@ The output should report Python 3.10 or newer.
 Clone the repository and enter its directory:
 
 ``` bash
-git clone https://github.com/Tetousz/Reverse-shell.git
-cd Reverse-shell
+git clone https://github.com/Tetousz/Reverse-shell-public.git
+cd Reverse-shell-public
 ```
 
 Create and activate a virtual environment. This keeps project
