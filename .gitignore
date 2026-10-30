@@ -1,0 +1,41 @@
+# ─── Python ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ─── Secrets / local config ─────────────────────────────
+# config.json may contain auth_secret — never commit
+config.json
+config.local.json
+.env
+.env.*
+
+# ─── Generated payloads ─────────────────────────────────
+builds/*
+!builds/.gitkeep
+
+# ─── Runtime logs ────────────────────────────────────
+logs/*
+!logs/.gitkeep
+
+# ─── ngrok binary────────────────────────────────────────
+ngrok
+ngrok-stable-*
+ngrok.zip
+
+# ─── Editor / IDE ───────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── OS ─────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

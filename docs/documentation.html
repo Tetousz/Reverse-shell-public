@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Reverse Shell Controller</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-brand">RSC /</a>
+        <div class="nav-links">
+            <a href="index.html">Overview</a>
+            <a href="setup.html">Setup</a>
+            <a href="documentation.html" class="active">Documentation</a>
+            <a href="https://github.com/Tetousz/Reverse-shell" target="_blank">GitHub ↗</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="card content">
+            <h1>Technical Documentation</h1>
+            <p>Deep dive into the architecture, threading model, and security layers of RSC.</p>
+            
+            <h2>1. System Architecture</h2>
+            <p>RSC uses a standard client-server architecture. The server listens on TCP port 4444 and is heavily multi-threaded:</p>
+            <ul>
+                <li><strong>Accept Thread:</strong> Listens for new connections and spawns handler threads.</li>
+                <li><strong>Client Handler Thread:</strong> Handles the authentication handshake.</li>
+                <li><strong>Client Read Loop:</strong> The sole reader of the socket. Feeds data into a queue.</li>
+                <li><strong>Keepalive Thread:</strong> Sends newlines every 25s to prevent timeouts.</li>
+                <li><strong>Rotation Thread:</strong> Recalculates HMAC tokens every hour.</li>
+            </ul>
+
+            <h2>2. The Wire Protocol</h2>
+            <p>Communication is line-based TCP. Authentication supports two formats:</p>
+            <pre><code># Legacy
+AUTH:&lt;token&gt;
+
+# Identity (Phase 8+)
+AUTH:&lt;server_uuid&gt;:&lt;payload_uuid&gt;:&lt;token&gt;</code></pre>
+            <p><strong>Sentinel Framing:</strong> Because TCP is a stream, command responses are wrapped in explicit markers to prevent race conditions:</p>
+            <pre><code>&lt;&lt;&lt;RSC_BEGIN&gt;&gt;&gt;
+&lt;actual output&gt;
+&lt;&lt;&lt;RSC_END&gt;&gt;&gt;</code></pre>
+
+            <h2>3. Server Implementation (Thread Race Fix)</h2>
+            <p>Initially, both <code>send_command</code> and the read loop tried to call <code>recv()</code> on the socket, causing a race condition where keepalives were consumed as command output.</p>
+            <p>This was solved by making <code>_client_read_loop</code> the <strong>sole reader</strong>. It feeds raw bytes into <code>session.response_queue.put(chunk)</code>. <code>send_command</code> then blocks on the queue until it sees the <code>&lt;&lt;&lt;RSC_END&gt;&gt;&gt;</code> sentinel.</p>
+
+            <h2>4. Client Hibernation</h2>
+            <p>If the server goes offline, the client does not crash. It enters a hibernation loop, logging <code>[hibernate] &lt;reason&gt; — retry #N in 30s</code>. It retries every 30 seconds until the server comes back online.</p>
+
+            <h2>5. Security Architecture</h2>
+            <ul>
+                <li><strong>Rotating HMAC:</strong> Tokens expire every hour. <code>HMAC-SHA256(master_secret, window_num)</code>.</li>
+                <li><strong>UUID Integrity Check:</strong> The payload checks if <code>_RSC_LAUNCHED</code> and the correct <code>_RSC_UUID</code> are in the global scope. Extracted blobs exit silently.</li>
+                <li><strong>Decoys:</strong> The payload contains two extra Base64 blobs. <code>_DECOY1</code> prints fake version info. <code>_DECOY2</code> connects to the server and sends <code>Nice try dumbass</code>, triggering the server's Tripwire log.</li>
+                <li><strong>Persistent Registry:</strong> Payloads are tracked by UUID in <code>~/.config/reverse-shell/</code>. Revoking a payload removes it, causing future auths to fail.</li>
+            </ul>
+
+            <h2>6. Exporter Wrappers</h2>
+            <p>The Base64 payload is wrapped differently per format:</p>
+            <ul>
+                <li><strong>py:</strong> Direct <code>exec()</code>.</li>
+                <li><strong>sh:</strong> Bash heredoc piping to <code>python3 -c</code>.</li>
+                <li><strong>bat:</strong> PowerShell <code>-EncodedCommand</code> (UTF-16LE).</li>
+                <li><strong>js:</strong> Node's <code>child_process.spawn</code> piping to Python stdin.</li>
+                <li><strong>exe:</strong> Generates a PyInstaller <code>.spec</code> file.</li>
+            </ul>
+
+            <h2>7. Web Dashboard (Flask + SSE)</h2>
+            <p>Real-time updates are pushed using Server-Sent Events at <code>/api/logs/stream</code>. The server uses an <code>EventBus</code> singleton to broadcast logs, session additions, and disconnects to the frontend JavaScript.</p>
+
+        </div>
+    </main>
+
+</body>
+</html>

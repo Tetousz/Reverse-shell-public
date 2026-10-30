@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RSC Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="app">
+
+    <header class="header">
+      <div class="header-left">
+        <h1>rsc<span class="accent">_</span></h1>
+        <span class="muted">v2.0</span>
+      </div>
+
+      <div class="header-right">
+        <details class="dropdown">
+          <summary>export</summary>
+          <div class="dropdown-menu">
+            <a href="#" data-format="py">py</a>
+            <a href="#" data-format="sh">sh</a>
+            <a href="#" data-format="bat">bat</a>
+            <a href="#" data-format="js">js</a>
+            <a href="#" data-format="exe">exe</a>
+          </div>
+        </details>
+
+        <button id="server-toggle" class="btn btn-primary">
+          <span id="server-toggle-label">start server</span>
+        </button>
+
+        <div class="status">
+          <span id="status-dot" class="status-dot"></span>
+          <span id="status-text" class="muted">stopped</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="token-bar">
+      <span class="label">token</span>
+      <code id="token-value" class="token-value">—</code>
+      <span id="token-countdown" class="muted small"></span>
+      <button id="token-copy" class="btn btn-ghost small">copy</button>
+    </section>
+
+    <main class="main">
+      <aside class="card sidebar">
+        <div class="card-header">
+          <span>sessions</span>
+          <span id="session-count" class="badge">0</span>
+        </div>
+        <div id="sessions" class="session-list">
+          <div class="empty-state">no active sessions</div>
+        </div>
+      </aside>
+
+      <section class="card terminal-wrap">
+        <div class="card-header">
+          <span>terminal</span>
+        </div>
+        <div id="terminal" class="terminal"></div>
+      </section>
+    </main>
+
+    <footer class="command-bar">
+      <span class="prompt">$</span>
+      <input id="command-input" type="text" autocomplete="off"
+             placeholder="select a session first"
+             disabled>
+      <button id="command-send" class="btn btn-primary small" disabled>send</button>
+    </footer>
+
+  </div>
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>

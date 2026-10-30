@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reverse Shell Controller</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-brand">RSC /</a>
+        <div class="nav-links">
+            <a href="index.html" class="active">Overview</a>
+            <a href="setup.html">Setup</a>
+            <a href="documentation.html">Documentation</a>
+            <a href="https://github.com/Tetousz/Reverse-shell" target="_blank">GitHub ↗</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="hero">
+            <h1>Reverse Shell Controller</h1>
+            <p>An educational C2 framework featuring a Flask dashboard, multi-format payloads, and layered defense mechanisms.</p>
+            <div class="mt-4">
+                <a href="setup.html" class="btn">Get Started</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Project Status</h2>
+            <p><strong>Phase:</strong> 9 / 9 Complete (Polish passed)</p>
+            <p><strong>Tests:</strong> 10 Suites Passing</p>
+            <p><strong>Security:</strong> HMAC Rotation, UUID Integrity, Tripwire Decoys</p>
+        </div>
+
+        <div class="card">
+            <h2>Architecture</h2>
+            <p>The project is split into four primary modules:</p>
+            <ul>
+                <li><strong>Core:</strong> Shared utilities (HMAC auth, persistent state, Ngrok detection).</li>
+                <li><strong>Web:</strong> Flask + SSE dashboard running on localhost:8000.</li>
+                <li><strong>Exporter:</strong> Packages Python clients into portable ZIPs (`.py`, `.sh`, `.bat`, `.js`, `.exe`).</li>
+                <li><strong>Modules:</strong> The TCP server handling connections and command dispatch.</li>
+            </ul>
+        </div>
+    </main>
+
+</body>
+</html>

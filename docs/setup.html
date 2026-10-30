@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup - Reverse Shell Controller</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-brand">RSC /</a>
+        <div class="nav-links">
+            <a href="index.html">Overview</a>
+            <a href="setup.html" class="active">Setup</a>
+            <a href="documentation.html">Documentation</a>
+            <a href="https://github.com/Tetousz/Reverse-shell" target="_blank">GitHub ↗</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="card content">
+            <h1>Setup Guide</h1>
+            <p>Follow these steps to install, configure, and run the Reverse Shell Controller.</p>
+            
+            <h2>1. Prerequisites</h2>
+            <ul>
+                <li>Python 3.10 or newer.</li>
+                <li><code>pip</code> (Python package manager).</li>
+                <li>Flask (required for the web dashboard).</li>
+                <li>Ngrok (included as a binary in the repository root).</li>
+            </ul>
+            <p>Install Flask using your system's package manager:</p>
+            <pre><code># On Arch Linux
+sudo pacman -S python-flask
+
+# Or using pip
+pip install flask</code></pre>
+
+            <h2>2. Installation</h2>
+            <p>Clone the repository and install the required dependencies:</p>
+            <pre><code>git clone https://github.com/Tetousz/Reverse-shell.git
+cd Reverse-shell
+pip install -r requirements.txt</code></pre>
+            <p>Verify your Python installation:</p>
+            <pre><code>python3 --version</code></pre>
+
+            <h2>3. Ngrok Configuration (Optional)</h2>
+            <p>Ngrok is required if you want to connect to clients on different networks. If you only plan to test locally, you can skip this.</p>
+            <p>Authenticate Ngrok using your token:</p>
+            <pre><code>./ngrok config add-authtoken &lt;YOUR_TOKEN&gt;</code></pre>
+            <p>Start the TCP tunnel on port 4444:</p>
+            <pre><code>./ngrok tcp 4444</code></pre>
+            <p><strong>Important:</strong> Keep this Ngrok process running in the background. The exporter detects the active tunnel and bakes the public URL into the payload.</p>
+
+            <h2>4. Starting the Server</h2>
+            <p>RSC provides two dashboard interfaces. The Web Dashboard is recommended.</p>
+            <p><strong>Web Dashboard:</strong></p>
+            <pre><code>python3 -m web.main</code></pre>
+            <p>The browser should open automatically to <code>http://127.0.0.1:8000</code>.</p>
+            <p><strong>Tk Dashboard (Fallback):</strong></p>
+            <pre><code>python3 -m dashboard.main</code></pre>
+
+            <h2>5. Exporting a Payload</h2>
+            <ol>
+                <li>In the Web Dashboard, click <strong>Start Server</strong>.</li>
+                <li>Click <strong>Export Payload</strong>.</li>
+                <li>Select your desired format (e.g., <code>py</code>).</li>
+            </ol>
+            <p>This generates a <code>.zip</code> file in the <code>builds/</code> folder. The archive contains the payload script and the required <code>core/</code> dependencies.</p>
+
+            <h2>6. Testing Local Connection</h2>
+            <p>Extract the archive to a temporary directory and run it:</p>
+            <pre><code>mkdir -p /tmp/test/
+unzip builds/payload_py.zip -d /tmp/test/
+cd /tmp/test/
+python3 payload_py.py</code></pre>
+            <p>You should see a new session appear in the dashboard.</p>
+
+            <h2>7. Testing Remote Connection</h2>
+            <p>If Ngrok was running when you exported the payload, you can transfer the unzipped folder to a different machine. Run the payload, and it will automatically connect back via the baked-in Ngrok URL.</p>
+
+            <h2>8. Troubleshooting</h2>
+            <details>
+                <summary><strong>Port 4444 is already in use</strong></summary>
+                <p>Find and stop the conflicting process:</p>
+                <pre><code>sudo lsof -i :4444</code></pre>
+            </details>
+            <details>
+                <summary><strong>Ngrok forwarding address changed</strong></summary>
+                <p>Free Ngrok addresses change when restarted. You must restart the server and export a new payload.</p>
+            </details>
+            <details>
+                <summary><strong>ModuleNotFoundError: No module named 'flask'</strong></summary>
+                <p>Flask is missing from your environment. Run: <code>pip install flask</code>.</p>
+            </details>
+        </div>
+    </main>
+
+</body>
+</html>
