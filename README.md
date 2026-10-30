@@ -90,8 +90,8 @@ sudo pacman -S python-flask
 Clone the repository:
 
 ```bash
-git clone <REPOSITORY_URL>
-cd Reverse-Shell-Controller
+git clone https://github.com/Tetousz/Reverse-shell-public.git
+cd Reverse-shell-public
 ```
 
 Install the required dependencies:
