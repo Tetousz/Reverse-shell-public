@@ -6,10 +6,11 @@ import threading
 import time
 import os
 import queue
+import shutil
 
 
 class NgrokManager:
-    def __init__(self, port=4444, binary_path="./ngrok", region="us"):
+    def __init__(self, port=4444, binary_path="ngrok", region="eu"):
         self.port = port
         self.binary_path = binary_path
         self.region = region
@@ -19,6 +20,19 @@ class NgrokManager:
         self._q = None
         self._reader_thread = None
 
+    def _resolve_binary(self):
+        """Find the ngrok binary, checking local folder first, then system PATH."""
+        # 1. Check local folder (e.g., ./ngrok)
+        if os.path.exists(self.binary_path):
+            return os.path.abspath(self.binary_path)
+        
+        # 2. Check system PATH (e.g., installed via pacman/apt)
+        system_path = shutil.which("ngrok")
+        if system_path:
+            return system_path
+
+        return None
+
     def start(self):
         if self.process and self.public_url:
             return True
@@ -26,8 +40,10 @@ class NgrokManager:
         if self.process:
             self.stop()
 
-        if not os.path.exists(self.binary_path):
-            print(f"[-] Ngrok binary not found at {self.binary_path}")
+        resolved_bin = self._resolve_binary()
+        if not resolved_bin:
+            print("[-] Ngrok binary not found in project folder or system PATH.")
+            print("[-] Install it via your package manager (e.g., 'sudo pacman -S ngrok') or place it in the root folder.")
             return False
 
         self._stop_event.clear()
@@ -35,7 +51,7 @@ class NgrokManager:
         self._q = queue.Queue()
 
         cmd = [
-            self.binary_path, "tcp", str(self.port),
+            resolved_bin, "tcp", str(self.port),
             f"--region={self.region}",
             "--log=stdout",
             "--log-format=logfmt",
